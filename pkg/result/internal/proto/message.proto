@@ -1,0 +1,55 @@
+// Copyright 2023 Sean (MovieStoreGuy) Marciniak
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+package result;
+
+option go_package = 
+  "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto";
+
+// Result is an invidual result that have been captured for a given benchmark
+// additional information regarding the OS and the CPU arch are also captued.
+message Result {
+  // Platform is the system capturing the statistics,
+  // typically this will be the OS but for front end performance
+  // monitoring it will be assigned to the web driver
+  string platform   = 1;
+  // Arch is the CPU architecture
+  // that the benchmarks were captured on.
+  string arch       = 2;
+  // Name is the full name of the benchmark
+  string name       = 3;
+  // Executions is the number of times the benckmark was
+  // run in order to converage on the final value
+  uint64 executions = 4;
+  // Value is the converaged value of the benchmark
+  double value      = 5;
+  // Metric is the name of the metric captured from the benchmark
+  string metric     = 6;
+};
+
+// Project is the information about project itself
+// to use a metadata to store results against
+message Project {
+  string name      = 1;
+  string tag       = 2;
+  string commit_id = 3;
+};
+
+// Bencharmk combines the project information
+// and the results to be able to write data together
+message Benchmark {
+  Project         project = 1;
+  repeated Result results = 2;
+};

@@ -1,0 +1,70 @@
+DEFAULT_GOAL := common
+
+##############################################
+# Project tools
+##############################################
+BIN_DIR       := $(PWD)/bin
+TOOL_DIR      := $(PWD)/internal/tools
+TOOL_PACKAGES := $(shell grep -E "\s+_\s+\"(.*)\"" < $(TOOL_DIR)/tools.go | tr -d " _\"" )
+TOOL_BIN      := $(addprefix $(BIN_DIR)/,$(notdir $(TOOL_PACKAGES)))
+
+$(BIN_DIR):
+	mkdir -p $@
+
+$(TOOL_BIN): $(BIN_DIR) $(TOOL_DIR)/go.mod
+	cd $(TOOL_DIR) && $(GOCMD) build $(GOBUILD_FLAGS) -o $@ $(filter %/$(notdir $@),$(TOOL_PACKAGES))
+
+.PHONY: tools
+tools: $(TOOL_BIN)
+
+.PHONY: addlicense
+addlicense: $(BIN_DIR)/addlicense
+	$(BIN_DIR)/addlicense -c "Sean (MovieStoreGuy) Marciniak" $(GOSRC_FILES)
+
+.PHONY: common
+common: porto generate lint addlicense
+
+.PHONY: porto 
+porto: $(BIN_DIR)/porto
+	$(BIN_DIR)/porto -w --include-internal ./
+
+.PHONY: lint
+lint: $(BIN_DIR)/golangci-lint
+	$(BIN_DIR)/golangci-lint run --allow-parallel-runners --timeout 5s -v ./...
+
+##############################################
+# Golang related targets and variables
+##############################################
+GOCMD         := go
+GOTEST_FLAGS  := --cover --race --count=10 -v
+GOBUILD_FLAGS := -trimpath -ldflags="-s -w"
+GOSRC_FILES   := $(shell find . -type f -name '*.go' -o -type f -name '*.proto')
+
+.PHONY: download
+download:
+	$(GOCMD) mod download
+
+.PHONY: generate
+generate:
+	$(GOCMD) generate -x ./...
+
+.PHONY: tidy
+tidy: 
+	$(RM) go.sum
+	$(GOCMD) mod tidy
+
+.PHONY: test
+test:
+	$(GOCMD) $(GOTEST_FLAGS) ./...
+
+##############################################
+# Util commands
+##############################################
+.PHONY: info
+info:
+	@printf "\e[93mCurrently running in \e[32m$(CURDIR)\e[0m\n"
+
+.PHONY: clean
+clean:
+	$(RM) -r $(BIN_DIR)
+	$(GOCMD) clean
