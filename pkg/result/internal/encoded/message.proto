@@ -16,7 +16,7 @@ syntax = "proto3";
 package result;
 
 option go_package = 
-  "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto";
+  "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded";
 
 // Result is an invidual result that have been captured for a given benchmark
 // additional information regarding the OS and the CPU arch are also captued.
@@ -39,7 +39,7 @@ message Result {
   string metric     = 6;
 };
 
-// Project is the information about project itself
+// Project is the information about project itselfsad
 // to use a metadata to store results against
 message Project {
   string name      = 1;

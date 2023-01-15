@@ -31,12 +31,16 @@ var (
 // Encoder is used to write the result data
 // out as a specific format.
 type Encoder interface {
-	Encode(bench *Benchmark) error
+	Encode(bench Benchmark) error
 }
 
+// NewEncoderFunc allows to create an inline encoder
+// to help unify how encoders are implemented
 type NewEncoderFunc func(out io.Writer) (Encoder, error)
 
-type EncoderFunc func(bench *Benchmark) error
+// EncoderFunc allows for a function definition to replace
+// how the Benchmark is being consumed
+type EncoderFunc func(bench Benchmark) error
 
 // EncoderFactory allows for a different types of
 // export formats to be defined and used.
@@ -44,20 +48,21 @@ type EncoderFactory interface {
 	NamedEncoder(name string, out io.Writer) (Encoder, error)
 }
 
-func (fn EncoderFunc) Encode(bench *Benchmark) error {
+func (fn EncoderFunc) Encode(bench Benchmark) error {
 	return fn(bench)
 }
 
 type factoryMap map[string]NewEncoderFunc
 
 var (
+	_ Encoder        = (EncoderFunc)(nil)
 	_ EncoderFactory = (*factoryMap)(nil)
 )
 
 func NewEncoderFactory() EncoderFactory {
 	return factoryMap{
 		"proto": NewEncoderFunc(func(out io.Writer) (Encoder, error) {
-			return EncoderFunc(func(bench *Benchmark) error {
+			return EncoderFunc(func(bench Benchmark) error {
 				buf, err := proto.Marshal(bench.original())
 				if err != nil {
 					return err
@@ -67,7 +72,7 @@ func NewEncoderFactory() EncoderFactory {
 			}), nil
 		}),
 		"json": NewEncoderFunc(func(out io.Writer) (Encoder, error) {
-			return EncoderFunc(func(bench *Benchmark) error {
+			return EncoderFunc(func(bench Benchmark) error {
 				buf, err := protojson.Marshal(bench.original())
 				if err != nil {
 					return err

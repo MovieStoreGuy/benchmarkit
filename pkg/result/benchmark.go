@@ -14,17 +14,19 @@
 
 package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
 
-import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto"
+import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded"
 
 type Benchmark struct {
-	orig *proto.Benchmark
+	orig *encoded.Benchmark
 }
 
 func NewBenchmark() Benchmark {
-	return Benchmark{orig: &proto.Benchmark{
-		Project: &proto.Project{},
-		Results: []*proto.Result{},
-	}}
+	return Benchmark{
+		orig: &encoded.Benchmark{
+			Project: new(encoded.Project),
+			Results: []*encoded.Result{},
+		},
+	}
 }
 
 func (b *Benchmark) SetProject(p *Project) {
@@ -43,6 +45,6 @@ func (b *Benchmark) Results() *ResultSlice {
 	return &ResultSlice{orig: &b.orig.Results}
 }
 
-func (b *Benchmark) original() *proto.Benchmark {
+func (b *Benchmark) original() *encoded.Benchmark {
 	return b.orig
 }

@@ -14,14 +14,16 @@
 
 package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
 
-import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto"
+import (
+	"github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded"
+)
 
 type Result struct {
-	orig *proto.Result
+	orig *encoded.Result
 }
 
 func NewResult() Result {
-	return Result{orig: &proto.Result{}}
+	return Result{orig: &encoded.Result{}}
 }
 
 func (r *Result) SetPlatform(platform string) {
@@ -72,6 +74,6 @@ func (r *Result) Metric() string {
 	return r.orig.GetMetric()
 }
 
-func (r *Result) original() *proto.Result {
+func (r *Result) original() *encoded.Result {
 	return r.orig
 }

@@ -17,15 +17,15 @@ package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
 import (
 	"go.uber.org/multierr"
 
-	"github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto"
+	"github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded"
 )
 
 type ResultSlice struct {
-	orig *[]*proto.Result
+	orig *[]*encoded.Result
 }
 
 func NewResultSlice() ResultSlice {
-	return ResultSlice{orig: new([]*proto.Result)}
+	return ResultSlice{orig: new([]*encoded.Result)}
 }
 
 func (rs *ResultSlice) At(i int) *Result {
@@ -40,7 +40,7 @@ func (rs *ResultSlice) Append(results ...*Result) {
 }
 
 func (rs *ResultSlice) AppendEmpty() *Result {
-	(*rs.orig) = append((*rs.orig), &proto.Result{})
+	(*rs.orig) = append((*rs.orig), &encoded.Result{})
 	return &Result{orig: (*rs.orig)[rs.Len()-1]}
 }
 
@@ -48,7 +48,7 @@ func (rs *ResultSlice) EnsureCapacity(newcap int) {
 	if current := cap(*rs.orig); current >= newcap {
 		return
 	}
-	neworig := make([]*proto.Result, len(*rs.orig), newcap)
+	neworig := make([]*encoded.Result, len(*rs.orig), newcap)
 	copy(neworig, (*rs.orig))
 	rs.orig = &neworig
 }
@@ -59,7 +59,7 @@ func (rs *ResultSlice) Len() int {
 
 func (rs *ResultSlice) MoveAndAppend(slice *ResultSlice) {
 	(*rs.orig) = append((*rs.orig), slice.original()...)
-	slice.orig = new([]*proto.Result)
+	slice.orig = new([]*encoded.Result)
 }
 
 func (rs *ResultSlice) Range(fn func(r *Result) error) (errs error) {
@@ -73,6 +73,6 @@ func (rs *ResultSlice) SetAt(i int, r *Result) {
 	(*rs.orig)[i] = r.original()
 }
 
-func (rs *ResultSlice) original() []*proto.Result {
+func (rs *ResultSlice) original() []*encoded.Result {
 	return *rs.orig
 }

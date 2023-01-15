@@ -12,5 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package Encoded is the raw wire format of the project
+// and intentionally not directly exposed to simplify interactions.
+// Any protobuf definitions are not publically acessible that the provided
+// encoders are used.
+
 //go:generate protoc --go_opt=paths=source_relative --go_out=. message.proto
-package proto // import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto"
+package encoded // import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded"

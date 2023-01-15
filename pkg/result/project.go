@@ -14,14 +14,16 @@
 
 package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
 
-import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/proto"
+import (
+	"github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded"
+)
 
 type Project struct {
-	orig *proto.Project
+	orig *encoded.Project
 }
 
 func NewProject() Project {
-	return Project{orig: new(proto.Project)}
+	return Project{orig: new(encoded.Project)}
 }
 
 func (p *Project) SetName(name string) {
@@ -48,6 +50,6 @@ func (p *Project) CommitID() string {
 	return p.orig.GetCommitId()
 }
 
-func (p *Project) original() *proto.Project {
+func (p *Project) original() *encoded.Project {
 	return p.orig
 }
