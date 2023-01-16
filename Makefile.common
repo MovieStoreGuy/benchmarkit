@@ -22,7 +22,12 @@ addlicense: $(BIN_DIR)/addlicense
 	$(BIN_DIR)/addlicense -c "Sean (MovieStoreGuy) Marciniak" $(GOSRC_FILES)
 
 .PHONY: common
-common: porto generate lint addlicense
+common: porto generate fmt lint addlicense
+
+.PHONY: fmt
+fmt: $(BIN_DIR)/gofmt $(BIN_DIR)/goimports
+	$(BIN_DIR)/gofmt -w -s ./
+	$(BIN_DIR)/goimports -w  -local github.com/MovieStoreGuy/benchmarkit ./
 
 .PHONY: porto 
 porto: $(BIN_DIR)/porto

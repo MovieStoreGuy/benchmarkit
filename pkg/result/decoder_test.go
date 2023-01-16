@@ -12,16 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tools // import "github.com/MovieStoreGuy/benchmarkit/internal/tools"
-
-import (
-	_ "cmd/gofmt"
-
-	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
-	_ "github.com/google/addlicense"
-	_ "github.com/goreleaser/goreleaser"
-	_ "github.com/jcchavezs/porto/cmd/porto"
-	_ "github.com/yoheimuta/protolint/cmd/protolint"
-	_ "golang.org/x/tools/cmd/goimports"
-	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
-)
+package result

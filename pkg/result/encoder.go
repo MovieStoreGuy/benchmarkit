@@ -45,23 +45,23 @@ type EncoderFunc func(bench Benchmark) error
 // EncoderFactory allows for a different types of
 // export formats to be defined and used.
 type EncoderFactory interface {
-	NamedEncoder(name string, out io.Writer) (Encoder, error)
+	NewEncoder(format Format, out io.Writer) (Encoder, error)
 }
 
 func (fn EncoderFunc) Encode(bench Benchmark) error {
 	return fn(bench)
 }
 
-type factoryMap map[string]NewEncoderFunc
+type encoderMap map[Format]NewEncoderFunc
 
 var (
 	_ Encoder        = (EncoderFunc)(nil)
-	_ EncoderFactory = (*factoryMap)(nil)
+	_ EncoderFactory = (*encoderMap)(nil)
 )
 
 func NewEncoderFactory() EncoderFactory {
-	return factoryMap{
-		"proto": NewEncoderFunc(func(out io.Writer) (Encoder, error) {
+	return encoderMap{
+		FormatProtobuf: NewEncoderFunc(func(out io.Writer) (Encoder, error) {
 			return EncoderFunc(func(bench Benchmark) error {
 				buf, err := proto.Marshal(bench.original())
 				if err != nil {
@@ -71,7 +71,7 @@ func NewEncoderFactory() EncoderFactory {
 				return err
 			}), nil
 		}),
-		"json": NewEncoderFunc(func(out io.Writer) (Encoder, error) {
+		FormatJSON: NewEncoderFunc(func(out io.Writer) (Encoder, error) {
 			return EncoderFunc(func(bench Benchmark) error {
 				buf, err := protojson.Marshal(bench.original())
 				if err != nil {
@@ -84,10 +84,10 @@ func NewEncoderFactory() EncoderFactory {
 	}
 }
 
-func (fm factoryMap) NamedEncoder(name string, out io.Writer) (Encoder, error) {
-	fn, ok := fm[name]
+func (fm encoderMap) NewEncoder(format Format, out io.Writer) (Encoder, error) {
+	fn, ok := fm[format]
 	if !ok {
-		return nil, fmt.Errorf("encoder %s : %w", name, ErrUndefinedNamedDecoder)
+		return nil, fmt.Errorf("format %s : %w", format, ErrUndefinedNamedDecoder)
 	}
 	return fn(out)
 }
