@@ -28,23 +28,23 @@ func NewResultSlice() ResultSlice {
 	return ResultSlice{orig: new([]*encoded.Result)}
 }
 
-func (rs *ResultSlice) At(i int) *Result {
+func (rs ResultSlice) At(i int) *Result {
 	return &Result{orig: (*rs.orig)[i]}
 }
 
-func (rs *ResultSlice) Append(results ...*Result) {
+func (rs ResultSlice) Append(results ...*Result) {
 	rs.EnsureCapacity(rs.Len() + len(results))
 	for i := 0; i < len(results); i++ {
 		(*rs.orig)[i] = results[i].original()
 	}
 }
 
-func (rs *ResultSlice) AppendEmpty() *Result {
+func (rs ResultSlice) AppendEmpty() *Result {
 	(*rs.orig) = append((*rs.orig), &encoded.Result{})
 	return &Result{orig: (*rs.orig)[rs.Len()-1]}
 }
 
-func (rs *ResultSlice) EnsureCapacity(newcap int) {
+func (rs ResultSlice) EnsureCapacity(newcap int) {
 	if current := cap(*rs.orig); current >= newcap {
 		return
 	}
@@ -53,26 +53,26 @@ func (rs *ResultSlice) EnsureCapacity(newcap int) {
 	rs.orig = &neworig
 }
 
-func (rs *ResultSlice) Len() int {
+func (rs ResultSlice) Len() int {
 	return len(*rs.orig)
 }
 
-func (rs *ResultSlice) MoveAndAppend(slice *ResultSlice) {
+func (rs ResultSlice) MoveAndAppend(slice *ResultSlice) {
 	(*rs.orig) = append((*rs.orig), slice.original()...)
 	slice.orig = new([]*encoded.Result)
 }
 
-func (rs *ResultSlice) Range(fn func(r *Result) error) (errs error) {
+func (rs ResultSlice) Range(fn func(r *Result) error) (errs error) {
 	for i, len := 0, rs.Len(); i < len; i++ {
 		errs = multierr.Append(errs, fn(rs.At(i)))
 	}
 	return errs
 }
 
-func (rs *ResultSlice) SetAt(i int, r *Result) {
+func (rs ResultSlice) SetAt(i int, r *Result) {
 	(*rs.orig)[i] = r.original()
 }
 
-func (rs *ResultSlice) original() []*encoded.Result {
+func (rs ResultSlice) original() []*encoded.Result {
 	return *rs.orig
 }

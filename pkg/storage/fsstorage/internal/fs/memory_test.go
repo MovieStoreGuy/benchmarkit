@@ -12,21 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
-
-// Decoder reads in the bytes buffer to be converted into `Benchmark`.
-type Decoder interface {
-	Decode(data []byte) (Benchmark, error)
-}
-
-// DecodeFunc allows for an inline function to be converted
-// into a `Decoder`
-type DecoderFunc func(data []byte) (Benchmark, error)
-
-var (
-	_ Decoder = (DecoderFunc)(nil)
-)
-
-func (fn DecoderFunc) Decode(data []byte) (Benchmark, error) {
-	return fn(data)
-}
+package fs

@@ -14,37 +14,18 @@
 
 package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
 
-import "github.com/MovieStoreGuy/benchmarkit/pkg/result/internal/encoded"
-
-type Benchmark struct {
-	orig *encoded.Benchmark
+// Encoder is used to convert a `Benchmark` into a bytes buffer.
+type Encoder interface {
+	Encode(bench Benchmark) ([]byte, error)
 }
 
-func NewBenchmark() Benchmark {
-	return Benchmark{
-		orig: &encoded.Benchmark{
-			Project: new(encoded.Project),
-			Results: []*encoded.Result{},
-		},
-	}
-}
+// EncoderFunc is used to create an inline `Encoder`
+type EncoderFunc func(bench Benchmark) ([]byte, error)
 
-func (b Benchmark) SetProject(p Project) {
-	b.orig.Project = p.original()
-}
+var (
+	_ Encoder = (EncoderFunc)(nil)
+)
 
-func (b Benchmark) SetResults(results ResultSlice) {
-	b.orig.Results = results.original()
-}
-
-func (b Benchmark) Project() *Project {
-	return &Project{orig: b.orig.Project}
-}
-
-func (b Benchmark) Results() ResultSlice {
-	return ResultSlice{orig: &b.orig.Results}
-}
-
-func (b *Benchmark) original() *encoded.Benchmark {
-	return b.orig
+func (fn EncoderFunc) Encode(bench Benchmark) ([]byte, error) {
+	return fn(bench)
 }

@@ -26,54 +26,54 @@ func NewResult() Result {
 	return Result{orig: &encoded.Result{}}
 }
 
-func (r *Result) SetPlatform(platform string) {
+func (r Result) SetPlatform(platform string) {
 	r.orig.Platform = platform
 }
 
-func (r *Result) SetArch(arch string) {
+func (r Result) SetArch(arch string) {
 	r.orig.Arch = arch
 }
 
-func (r *Result) SetName(name string) {
+func (r Result) SetName(name string) {
 	r.orig.Name = name
 }
 
-func (r *Result) SetExecutions(n uint64) {
+func (r Result) SetExecutions(n uint64) {
 	r.orig.Executions = n
 }
 
-func (r *Result) SetValue(value float64) {
+func (r Result) SetValue(value float64) {
 	r.orig.Value = value
 }
 
-func (r *Result) SetMetric(metric string) {
+func (r Result) SetMetric(metric string) {
 	r.orig.Metric = metric
 }
 
-func (r *Result) Platform() string {
+func (r Result) Platform() string {
 	return r.orig.GetPlatform()
 }
 
-func (r *Result) Arch() string {
+func (r Result) Arch() string {
 	return r.orig.GetArch()
 }
 
-func (r *Result) Name() string {
+func (r Result) Name() string {
 	return r.orig.GetName()
 }
 
-func (r *Result) Executions() uint64 {
+func (r Result) Executions() uint64 {
 	return r.orig.GetExecutions()
 }
 
-func (r *Result) Value() float64 {
+func (r Result) Value() float64 {
 	return r.orig.GetValue()
 }
 
-func (r *Result) Metric() string {
+func (r Result) Metric() string {
 	return r.orig.GetMetric()
 }
 
-func (r *Result) original() *encoded.Result {
+func (r Result) original() *encoded.Result {
 	return r.orig
 }

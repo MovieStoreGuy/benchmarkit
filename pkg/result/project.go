@@ -26,30 +26,30 @@ func NewProject() Project {
 	return Project{orig: new(encoded.Project)}
 }
 
-func (p *Project) SetName(name string) {
+func (p Project) SetName(name string) {
 	p.orig.Name = name
 }
 
-func (p *Project) SetTag(tag string) {
+func (p Project) SetTag(tag string) {
 	p.orig.Tag = tag
 }
 
-func (p *Project) SetCommitID(id string) {
+func (p Project) SetCommitID(id string) {
 	p.orig.CommitId = id
 }
 
-func (p *Project) Name() string {
+func (p Project) Name() string {
 	return p.orig.GetName()
 }
 
-func (p *Project) Tag() string {
+func (p Project) Tag() string {
 	return p.orig.GetTag()
 }
 
-func (p *Project) CommitID() string {
+func (p Project) CommitID() string {
 	return p.orig.GetCommitId()
 }
 
-func (p *Project) original() *encoded.Project {
+func (p Project) original() *encoded.Project {
 	return p.orig
 }

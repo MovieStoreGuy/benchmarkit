@@ -12,21 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package result // import "github.com/MovieStoreGuy/benchmarkit/pkg/result"
+package fs // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/fs"
 
-// Decoder reads in the bytes buffer to be converted into `Benchmark`.
-type Decoder interface {
-	Decode(data []byte) (Benchmark, error)
+import "io/fs"
+
+// ManagedFS is an interface that allows CRUD interactions
+// with a abstracted filesystem.
+type ManagedFS interface {
+	Create(name string) (File, error)
+	Delete(name string) error
+	Open(name string) (File, error)
 }
 
-// DecodeFunc allows for an inline function to be converted
-// into a `Decoder`
-type DecoderFunc func(data []byte) (Benchmark, error)
+type (
+	FS       = fs.FS
+	FileInfo = fs.FileInfo
+	FileMode = fs.FileMode
 
-var (
-	_ Decoder = (DecoderFunc)(nil)
+	File interface {
+		fs.File
+
+		Write(p []byte) (int, error)
+	}
 )
-
-func (fn DecoderFunc) Decode(data []byte) (Benchmark, error) {
-	return fn(data)
-}
