@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fs // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/fs"
+package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
 
 import (
 	"bytes"
@@ -45,7 +45,7 @@ var (
 	_ FileInfo = (*memInfo)(nil)
 )
 
-func NewMemoryFS(root string) (ManagedFS, error) {
+func NewMemory(root string) (ManagedFS, error) {
 	return &memFS{
 		root: path.Clean(root),
 		data: make(map[string][]byte),

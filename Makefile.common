@@ -60,7 +60,11 @@ tidy:
 
 .PHONY: test
 test:
-	$(GOCMD) $(GOTEST_FLAGS) ./...
+	$(GOCMD) test $(GOTEST_FLAGS) ./...
+
+.PHONY: update-deps
+update-deps:
+	$(GOCMD) get -t -u ./...
 
 ##############################################
 # Util commands

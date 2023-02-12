@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fs // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/fs"
+package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
 
 import (
 	"os"
@@ -25,7 +25,7 @@ var (
 	_ ManagedFS = (*osFS)(nil)
 )
 
-func NewOSFS(root string) (ManagedFS, error) {
+func NewOS(root string) (ManagedFS, error) {
 	if _, err := os.Stat(path.Clean(root)); err != nil {
 		return nil, err
 	}

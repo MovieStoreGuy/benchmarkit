@@ -31,3 +31,7 @@ all-test:
 .PHONY: all-porto
 all-porto:
 	@$(MAKE) for-all-target TARGET="porto"
+
+.PHONY: all-update-deps
+all-update-deps:
+	@$(MAKE) for-all-target TARGET="update-deps"

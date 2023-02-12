@@ -34,3 +34,21 @@ type Storage[Reference any] interface {
 	// Delete removes the references from the storage
 	Delete(ctx context.Context, references ...Descriptor[Reference]) error
 }
+
+type Option[Reference any] interface {
+	Apply(Storage[Reference]) error
+
+	private()
+}
+
+type OptionFunc[Reference any] func(s Storage[Reference]) error
+
+var (
+	_ OptionFunc[any] = (OptionFunc[any])(nil)
+)
+
+func (of OptionFunc[Reference]) Apply(s Storage[Reference]) error {
+	return of(s)
+}
+
+func (OptionFunc[Reference]) private() {}

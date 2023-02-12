@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package fs // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/fs"
+package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
 
 import (
 	"errors"
@@ -27,6 +27,10 @@ type lockingFS struct {
 var (
 	_ ManagedFS = (*lockingFS)(nil)
 )
+
+func ApplyFSLock(fs ManagedFS) ManagedFS {
+	return &lockingFS{wrapped: fs}
+}
 
 func (lfs *lockingFS) Open(name string) (File, error) {
 	v, _ := lfs.locks.LoadOrStore(name, new(sync.Mutex))

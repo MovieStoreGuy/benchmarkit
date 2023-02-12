@@ -17,16 +17,17 @@ package fsstorage // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fs
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"strings"
 
 	"github.com/MovieStoreGuy/benchmarkit/pkg/result"
 	"github.com/MovieStoreGuy/benchmarkit/pkg/storage"
-	"github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/fs"
+	"github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
 )
 
 type storer struct {
-	fs      fs.ManagedFS
+	fs      filesystem.ManagedFS
 	encoder result.Encoder
 }
 
@@ -37,6 +38,64 @@ type FileReference struct {
 var (
 	_ storage.Storage[FileReference] = (*storer)(nil)
 )
+
+func WithRootDir(root string) storage.Option[FileReference] {
+	return storage.OptionFunc[FileReference](func(s storage.Storage[FileReference]) error {
+		store, ok := s.(*storer)
+		if !ok {
+			return errors.New("unable to cast to storer")
+		}
+		fs, err := filesystem.NewOS(root)
+		if err != nil {
+			return err
+		}
+		store.fs = fs
+		return nil
+	})
+}
+
+func WithFSLock() storage.Option[FileReference] {
+	return storage.OptionFunc[FileReference](func(s storage.Storage[FileReference]) error {
+		store, ok := s.(*storer)
+		if !ok {
+			return errors.New("unable to cast to storer")
+		}
+		store.fs = filesystem.ApplyFSLock(store.fs)
+		return nil
+	})
+}
+
+func WithInMemoryFS(root string) storage.Option[FileReference] {
+	return storage.OptionFunc[FileReference](func(s storage.Storage[FileReference]) error {
+		store, ok := s.(*storer)
+		if !ok {
+			return errors.New("unable to cast to storer")
+		}
+		fs, err := filesystem.NewMemory(root)
+		if err != nil {
+			return err
+		}
+		store.fs = fs
+		return nil
+	})
+}
+
+func New(opts ...storage.Option[FileReference]) (storage.Storage[FileReference], error) {
+	fs, err := filesystem.NewOS(".")
+	if err != nil {
+		return nil, err
+	}
+	s := &storer{
+		fs:      fs,
+		encoder: result.NewJSONEncoder(),
+	}
+	for _, opt := range opts {
+		if err := opt.Apply(s); err != nil {
+			return nil, err
+		}
+	}
+	return s, err
+}
 
 func hashName(vals ...string) string {
 	return strings.Join(vals, "_")
@@ -69,7 +128,7 @@ func (s *storer) Create(_ context.Context, benckmarks ...result.Benchmark) ([]st
 		if _, err = io.Copy(f, bytes.NewReader(content)); err != nil {
 			return nil, err
 		}
-		descriptors = append(descriptors, storage.NewDescriptor[FileReference](ref, b))
+		descriptors = append(descriptors, storage.NewDescriptor(ref, b))
 	}
 	return descriptors, nil
 }
