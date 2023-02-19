@@ -13,3 +13,13 @@
 // limitations under the License.
 
 package filesystem
+
+import "testing"
+
+func TestLockingLifecycle(t *testing.T) {
+	t.Parallel()
+
+	FileSystemLifecycle(t, func() ManagedFS {
+		return ApplyFSLock(NopFS{})
+	})
+}

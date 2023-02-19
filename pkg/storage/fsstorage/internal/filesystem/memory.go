@@ -16,10 +16,10 @@ package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/f
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"io/fs"
 	"path"
-	"time"
 )
 
 type memFS struct {
@@ -29,20 +29,12 @@ type memFS struct {
 
 type memFile struct {
 	io.ReadWriter
-	info memInfo
-}
-
-type memInfo struct {
-	name  string
-	size  int64
-	mtime time.Time
 }
 
 var (
 	_ ManagedFS = (*memFS)(nil)
 
-	_ File     = (*memFile)(nil)
-	_ FileInfo = (*memInfo)(nil)
+	_ File = (*memFile)(nil)
 )
 
 func NewMemory(root string) (ManagedFS, error) {
@@ -52,16 +44,11 @@ func NewMemory(root string) (ManagedFS, error) {
 	}, nil
 }
 
-func (mem *memFS) Open(name string) (File, error) {
+func (mem *memFS) Open(ctx context.Context, name string) (File, error) {
 	fp := path.Clean(path.Join(mem.root, name))
 	if content, ok := mem.data[fp]; ok {
 		return &memFile{
 			ReadWriter: bytes.NewBuffer(content),
-			info: memInfo{
-				name:  path.Base(fp),
-				size:  int64(len(content)),
-				mtime: time.Now(),
-			},
 		}, nil
 	}
 	return nil, &fs.PathError{
@@ -71,7 +58,7 @@ func (mem *memFS) Open(name string) (File, error) {
 	}
 }
 
-func (mem *memFS) Delete(name string) error {
+func (mem *memFS) Delete(ctx context.Context, name string) error {
 	fp := path.Clean(path.Join(mem.root, name))
 	if _, ok := mem.data[fp]; ok {
 		delete(mem.data, fp)
@@ -84,31 +71,20 @@ func (mem *memFS) Delete(name string) error {
 	}
 }
 
-func (mem *memFS) Create(name string) (File, error) {
+func (mem *memFS) Create(ctx context.Context, name string) (File, error) {
 	fp := path.Clean(path.Join(mem.root, name))
-	if content, ok := mem.data[fp]; !ok {
-		return &memFile{
-			ReadWriter: bytes.NewBuffer(content[:]),
-			info: memInfo{
-				name:  path.Base(fp),
-				size:  -1,
-				mtime: time.Now(),
-			},
-		}, nil
+	if _, ok := mem.data[fp]; ok {
+		return nil, &fs.PathError{
+			Op:   "open",
+			Path: fp,
+			Err:  fs.ErrExist,
+		}
 	}
-	return nil, &fs.PathError{
-		Op:   "open",
-		Path: fp,
-		Err:  fs.ErrExist,
-	}
+	content := make([]byte, 0, 100)
+	mem.data[fp] = content
+	return &memFile{
+		ReadWriter: bytes.NewBuffer(content[:]),
+	}, nil
 }
 
-func (mf *memFile) Stat() (FileInfo, error) { return &mf.info, nil }
-func (mf *memFile) Close() error            { return nil }
-
-func (ms *memInfo) Name() string       { return ms.name }
-func (ms *memInfo) Size() int64        { return ms.size }
-func (ms *memInfo) Mode() FileMode     { return FileMode(0) }
-func (ms *memInfo) ModTime() time.Time { return ms.mtime }
-func (ms *memInfo) IsDir() bool        { return ms.Mode().IsDir() }
-func (ms *memInfo) Sys() any           { return nil }
+func (f *memFile) Close() error { return nil }

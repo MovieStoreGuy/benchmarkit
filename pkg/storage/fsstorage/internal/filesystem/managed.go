@@ -14,24 +14,19 @@
 
 package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
 
-import "io/fs"
+import (
+	"context"
+	"io"
+)
 
 // ManagedFS is an interface that allows CRUD interactions
 // with a abstracted filesystem.
 type ManagedFS interface {
-	Create(name string) (File, error)
-	Delete(name string) error
-	Open(name string) (File, error)
+	Create(ctx context.Context, name string) (File, error)
+	Delete(ctx context.Context, name string) error
+	Open(ctx context.Context, name string) (File, error)
 }
 
-type (
-	FS       = fs.FS
-	FileInfo = fs.FileInfo
-	FileMode = fs.FileMode
-
-	File interface {
-		fs.File
-
-		Write(p []byte) (int, error)
-	}
-)
+type File interface {
+	io.ReadWriteCloser
+}

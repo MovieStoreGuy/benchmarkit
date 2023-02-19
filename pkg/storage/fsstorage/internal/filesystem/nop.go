@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,31 +16,38 @@ package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/f
 
 import (
 	"context"
-	"os"
-	"path"
+	"io/fs"
 )
 
-type osFS string
+type NopFS struct{}
+
+type NopFile struct{}
 
 var (
-	_ ManagedFS = (*osFS)(nil)
+	_ File      = (*NopFile)(nil)
+	_ ManagedFS = (*NopFS)(nil)
 )
 
-func NewOS(root string) (ManagedFS, error) {
-	if _, err := os.Stat(path.Clean(root)); err != nil {
-		return nil, err
-	}
-	return osFS(path.Clean(root)), nil
+func (NopFS) Create(_ context.Context, _ string) (File, error) {
+	return NopFile{}, nil
 }
 
-func (rfs osFS) Open(ctx context.Context, name string) (File, error) {
-	return os.Open(path.Clean(path.Join(string(rfs), name)))
+func (NopFS) Open(_ context.Context, _ string) (File, error) {
+	return nil, fs.ErrNotExist
 }
 
-func (rfs osFS) Delete(ctx context.Context, name string) error {
-	return os.Remove(path.Clean(path.Join(string(rfs), name)))
+func (NopFS) Delete(_ context.Context, _ string) error {
+	return nil
 }
 
-func (rfs osFS) Create(ctx context.Context, name string) (File, error) {
-	return os.Create(path.Clean(path.Join(string(rfs), name)))
+func (NopFile) Read(in []byte) (int, error) {
+	return len(in), nil
+}
+
+func (NopFile) Write(in []byte) (int, error) {
+	return len(in), nil
+}
+
+func (NopFile) Close() error {
+	return nil
 }

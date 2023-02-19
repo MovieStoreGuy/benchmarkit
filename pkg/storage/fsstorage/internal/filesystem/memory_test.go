@@ -13,3 +13,19 @@
 // limitations under the License.
 
 package filesystem
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+func TestMemoryLifecycle(t *testing.T) {
+	t.Parallel()
+
+	FileSystemLifecycle(t, func() ManagedFS {
+		fsys, err := NewMemory(t.TempDir())
+		require.NoError(t, err, "Must not error creating memory fs")
+		return fsys
+	})
+}

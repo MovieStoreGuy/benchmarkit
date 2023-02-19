@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,12 @@ package filesystem
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
-func TestOSLifeCycle(t *testing.T) {
+func TestInstrumentationLifecyle(t *testing.T) {
 	t.Parallel()
 
 	FileSystemLifecycle(t, func() ManagedFS {
-		fsys, err := NewOS(t.TempDir())
-		require.NoError(t, err, "Must not error creating dir")
-		return fsys
+		return ApplyInstrumented(NopFS{})
 	})
 }

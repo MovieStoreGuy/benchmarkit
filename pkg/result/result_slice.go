@@ -50,7 +50,7 @@ func (rs ResultSlice) EnsureCapacity(newcap int) {
 	}
 	neworig := make([]*encoded.Result, len(*rs.orig), newcap)
 	copy(neworig, (*rs.orig))
-	rs.orig = &neworig
+	(*rs.orig) = neworig
 }
 
 func (rs ResultSlice) Len() int {

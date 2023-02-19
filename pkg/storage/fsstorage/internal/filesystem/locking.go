@@ -15,6 +15,7 @@
 package filesystem // import "github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
 
 import (
+	"context"
 	"errors"
 	"sync"
 )
@@ -32,7 +33,7 @@ func ApplyFSLock(fs ManagedFS) ManagedFS {
 	return &lockingFS{wrapped: fs}
 }
 
-func (lfs *lockingFS) Open(name string) (File, error) {
+func (lfs *lockingFS) Open(ctx context.Context, name string) (File, error) {
 	v, _ := lfs.locks.LoadOrStore(name, new(sync.Mutex))
 	l, ok := v.(*sync.Mutex)
 	if !ok {
@@ -40,10 +41,10 @@ func (lfs *lockingFS) Open(name string) (File, error) {
 	}
 	l.Lock()
 	defer l.Unlock()
-	return lfs.wrapped.Open(name)
+	return lfs.wrapped.Open(ctx, name)
 }
 
-func (lfs *lockingFS) Delete(name string) error {
+func (lfs *lockingFS) Delete(ctx context.Context, name string) error {
 	v, _ := lfs.locks.LoadOrStore(name, new(sync.Mutex))
 	l, ok := v.(*sync.Mutex)
 	if !ok {
@@ -51,10 +52,10 @@ func (lfs *lockingFS) Delete(name string) error {
 	}
 	l.Lock()
 	defer l.Unlock()
-	return lfs.wrapped.Delete(name)
+	return lfs.wrapped.Delete(ctx, name)
 }
 
-func (lfs *lockingFS) Create(name string) (File, error) {
+func (lfs *lockingFS) Create(ctx context.Context, name string) (File, error) {
 	v, _ := lfs.locks.LoadOrStore(name, new(sync.Mutex))
 	l, ok := v.(*sync.Mutex)
 	if !ok {
@@ -62,5 +63,5 @@ func (lfs *lockingFS) Create(name string) (File, error) {
 	}
 	l.Lock()
 	defer l.Unlock()
-	return lfs.wrapped.Create(name)
+	return lfs.wrapped.Create(ctx, name)
 }

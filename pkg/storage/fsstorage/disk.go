@@ -21,6 +21,8 @@ import (
 	"io"
 	"strings"
 
+	sdktrace "go.opentelemetry.io/otel/trace"
+
 	"github.com/MovieStoreGuy/benchmarkit/pkg/result"
 	"github.com/MovieStoreGuy/benchmarkit/pkg/storage"
 	"github.com/MovieStoreGuy/benchmarkit/pkg/storage/fsstorage/internal/filesystem"
@@ -80,6 +82,20 @@ func WithInMemoryFS(root string) storage.Option[FileReference] {
 	})
 }
 
+func WithInstrumentedFS(tp sdktrace.TracerProvider) storage.Option[FileReference] {
+	return storage.OptionFunc[FileReference](func(s storage.Storage[FileReference]) error {
+		store, ok := s.(*storer)
+		if !ok {
+			return errors.New("unable to cast to storer")
+		}
+		store.fs = filesystem.ApplyInstrumented(
+			store.fs,
+			filesystem.WithTracerProvider(tp),
+		)
+		return nil
+	})
+}
+
 func New(opts ...storage.Option[FileReference]) (storage.Storage[FileReference], error) {
 	fs, err := filesystem.NewOS(".")
 	if err != nil {
@@ -105,7 +121,7 @@ func (s *storer) Init(_ context.Context) error {
 	return nil
 }
 
-func (s *storer) Create(_ context.Context, benckmarks ...result.Benchmark) ([]storage.Descriptor[FileReference], error) {
+func (s *storer) Create(ctx context.Context, benckmarks ...result.Benchmark) ([]storage.Descriptor[FileReference], error) {
 	var (
 		descriptors = make([]storage.Descriptor[FileReference], 0, len(benckmarks))
 	)
@@ -121,7 +137,7 @@ func (s *storer) Create(_ context.Context, benckmarks ...result.Benchmark) ([]st
 				b.Project().Tag(),
 			),
 		}
-		f, err := s.fs.Create(ref.Name)
+		f, err := s.fs.Create(ctx, ref.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -133,9 +149,9 @@ func (s *storer) Create(_ context.Context, benckmarks ...result.Benchmark) ([]st
 	return descriptors, nil
 }
 
-func (s *storer) Delete(_ context.Context, references ...storage.Descriptor[FileReference]) error {
+func (s *storer) Delete(ctx context.Context, references ...storage.Descriptor[FileReference]) error {
 	for _, ref := range references {
-		err := s.fs.Delete(hashName(
+		err := s.fs.Delete(ctx, hashName(
 			ref.Benchmark().Project().Name(),
 			ref.Benchmark().Project().CommitID(),
 			ref.Benchmark().Project().Tag(),
@@ -147,14 +163,14 @@ func (s *storer) Delete(_ context.Context, references ...storage.Descriptor[File
 	return nil
 }
 
-func (s *storer) Update(_ context.Context, references ...storage.Descriptor[FileReference]) error {
+func (s *storer) Update(ctx context.Context, references ...storage.Descriptor[FileReference]) error {
 	for _, ref := range references {
 		name := hashName(
 			ref.Benchmark().Project().Name(),
 			ref.Benchmark().Project().CommitID(),
 			ref.Benchmark().Project().Tag(),
 		)
-		f, err := s.fs.Open(name)
+		f, err := s.fs.Open(ctx, name)
 		if err != nil {
 			return err
 		}

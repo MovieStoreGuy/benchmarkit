@@ -37,8 +37,6 @@ type Storage[Reference any] interface {
 
 type Option[Reference any] interface {
 	Apply(Storage[Reference]) error
-
-	private()
 }
 
 type OptionFunc[Reference any] func(s Storage[Reference]) error
@@ -50,5 +48,3 @@ var (
 func (of OptionFunc[Reference]) Apply(s Storage[Reference]) error {
 	return of(s)
 }
-
-func (OptionFunc[Reference]) private() {}
